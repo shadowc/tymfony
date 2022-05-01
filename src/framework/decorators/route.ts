@@ -5,14 +5,24 @@ export interface RoutingOptions {
     methods?: string[]
 }
 
+export interface RoutingItem {
+    object: any;
+    property: string;
+    routingOptions: RoutingOptions;
+}
+
+export interface RoutingData {
+    [index: string]: RoutingItem;
+}
+
+export const Routes: RoutingData = {};
+
 export const Route = (routingOptions: RoutingOptions) => {
     return (property: any, name: string, descriptor: PropertyDescriptor) => {
-        console.log(routingOptions);
-        console.log('property: ', property);
-        console.log('name', name);
-        console.log('descriptor', descriptor);
-
-        console.log('framework is here!', property.framework);
-        property[name]();
+        Routes[routingOptions.name] = {
+            object: property,
+            property: name,
+            routingOptions,
+        };
     };
 }

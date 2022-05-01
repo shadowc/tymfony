@@ -9,6 +9,7 @@ import IFramework from '@Framework/types/framework';
 import FileScanner from '@Framework/helpers/FileScanner.js';
 import ConfigLoader from '@Framework/helpers/ConfigLoader.js';
 import * as Controllers from '@src/controllers_bundle';
+import { Routes, RoutingData } from '@Framework/decorators/route';
 
 export default class Framework implements IFramework {
     private expressInstance: Express;
@@ -22,6 +23,7 @@ export default class Framework implements IFramework {
     public environment: TwingEnvironment;
     public config: ConfigSchema;
     public controllers: IAbstractController[] = [];
+    public routes: RoutingData;
 
     constructor() {
         if (typeof path.resolve === 'undefined') {
@@ -51,10 +53,13 @@ export default class Framework implements IFramework {
 
         this.controllers = Object.keys(Controllers).map(key => (new (Controllers as any)[key](this) as IAbstractController));
 
+        this.routes = Routes;
+        console.log(this.routes);
+
         // Start the Twig Engine
         const twigBasePath = path.resolve(this.projectRoot, this.config.twig.template_path);
         const TwigLoader = new TwingLoaderFilesystem(path.resolve(this.projectRoot, twigBasePath));
-        this.environment = new TwingEnvironment(TwigLoader)
+        this.environment = new TwingEnvironment(TwigLoader);
     }
 
     public start() {
