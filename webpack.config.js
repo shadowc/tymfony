@@ -30,7 +30,7 @@ module.exports = {
             APP_VERSION: JSON.stringify(JSON.parse(fs.readFileSync(path.resolve('./package.json')).toString()).version),
         }),
     ],
-    devtool: process.env.APP_ENV === 'production' ? false : 'eval-source-map',
+    devtool: false,
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
         alias: {
