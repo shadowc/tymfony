@@ -13,7 +13,8 @@
         "moduleResolution": "node",
         "baseUrl": "./src",
         "paths": {
-            "@Framework/*": ["framework/*"]
+            "@Framework/*": ["framework/*"],
+            "@src/*": ["*"]
         }
     },
     "include": [

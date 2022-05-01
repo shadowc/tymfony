@@ -1,39 +1,15 @@
 const webpack = require('webpack');
 const path = require('path');
 const fs = require('fs');
-const FileScanner = require('./src/framework/helpers/FileScanner');
-const ConfigLoader = require('./src/framework/helpers/ConfigLoader');
+const WebpackPrecompiler = require('./src/framework/WebpackPrecompiler');
 
-fileScanner = new FileScanner();
-configLoader = new ConfigLoader();
-
-const mainConfig = {};
 const mainConfigPath = path.resolve('.', 'config');
+const precompiler = new WebpackPrecompiler(mainConfigPath);
 
-fileScanner.scanFiles(mainConfigPath, (file) => {
-    const configData = configLoader.loadConfigFile(file);
-    if (configData !== null) {
-        Object.assign(mainConfig, configData);
-    }
-});
+// This writes the controllers_bundle.ts file to be included by the framework
+precompiler.createControllerBundle(path.resolve('.', 'src', 'controllers_bundle.ts'));
 
-const mainControllerPath = path.resolve('.', 'src', mainConfig.framework.controller_path);
-const entry = {
-    'build/app': path.resolve('.', 'src', 'main'),
-};
-
-fileScanner.scanFiles(mainControllerPath, (file) => {
-    if (file.substring(file.length - 3) === '.ts') {
-        const fileName = `build/${file.substring(file.indexOf(mainConfig.framework.controller_path))}`;
-        entry[fileName] = {
-            import: path.resolve(mainControllerPath, file),
-            library: {
-                name: fileName,
-                type: 'umd',
-            },
-        };
-    }
-});
+// TODO: Auto import services and other files under src. Auto-wiring also could happen here.
 
 module.exports = {
     target: "node",
@@ -41,7 +17,9 @@ module.exports = {
     watchOptions: {
         ignored: '**/node_modules',
     },
-    entry,
+    entry: {
+        'build/app': path.resolve('.', 'src', 'main'),
+    },
     output: {
         path: path.resolve('.'),
         filename: '[name].js',
@@ -65,7 +43,8 @@ module.exports = {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
         alias: {
-            '@Framework': path.resolve(__dirname, 'src/framework'),
+            '@src': path.resolve(__dirname, 'src'),
+            '@Framework': path.resolve(__dirname, 'src', 'framework'),
         },
     },
 };

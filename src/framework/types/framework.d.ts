@@ -6,4 +6,5 @@ export default interface IFramework {
     environment: TwingEnvironment;
     config: ConfigSchema;
     controllers: IAbstractController[];
+    start: () => void;
 }

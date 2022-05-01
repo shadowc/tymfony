@@ -1,16 +1,14 @@
+import 'dotenv/config';
 import path from 'path';
-import { readFileSync } from 'fs';
 import  { Express } from 'express';
 import express from 'express';
-import 'dotenv/config';
 import { TwingEnvironment, TwingLoaderFilesystem } from 'twing';
 import { ConfigSchema } from '@Framework/types/config/config';
 import IAbstractController from '@Framework/types/controller';
 import IFramework from '@Framework/types/framework';
 import FileScanner from '@Framework/helpers/FileScanner.js';
 import ConfigLoader from '@Framework/helpers/ConfigLoader.js';
-import {buildSolutionReferences} from "ts-loader/dist/instances";
-import AbstractController from "@Framework/AbstractController";
+import * as Controllers from '@src/controllers_bundle';
 
 export default class Framework implements IFramework {
     private expressInstance: Express;
@@ -51,14 +49,15 @@ export default class Framework implements IFramework {
         console.log(`Reading config files at "${mainConfigPath}".`);
         this.scanFiles(mainConfigPath, this.loadConfigFile.bind(this));
 
-        const mainControllersPath = path.resolve(this.sourceRoot, this.config.framework.controller_path);
-        this.scanFiles(mainControllersPath, this.loadController.bind(this));
+        this.controllers = Object.keys(Controllers).map(key => (new (Controllers as any)[key](this) as IAbstractController));
 
         // Start the Twig Engine
         const twigBasePath = path.resolve(this.projectRoot, this.config.twig.template_path);
         const TwigLoader = new TwingLoaderFilesystem(path.resolve(this.projectRoot, twigBasePath));
         this.environment = new TwingEnvironment(TwigLoader)
+    }
 
+    public start() {
         // start server listen
         this.expressInstance.listen(this.appPort);
     }
@@ -83,18 +82,6 @@ export default class Framework implements IFramework {
 
         if (configObject !== null) {
             this.config = Object.assign(this.config, configObject);
-        }
-    }
-
-    private loadController(absolutePath: string) {
-        if (absolutePath.substring(absolutePath.length - 3) === '.ts') {
-            const builtFilePath = `./${absolutePath.substring(absolutePath.indexOf(this.config.framework.controller_path))}`;
-
-            console.log('requiring file: ' + builtFilePath);
-            const module = require('./build/' + builtFilePath);
-            console.log(module);
-
-            //this.controllers.push(new module());
         }
     }
 

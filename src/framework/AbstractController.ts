@@ -2,7 +2,7 @@ import IAbstractController from '@Framework/types/controller';
 import IFramework from '@Framework/types/framework';
 
 export default class AbstractController implements IAbstractController {
-    protected framework: IFramework
+    public framework: IFramework
 
     constructor(framework: IFramework) {
         this.framework = framework;
