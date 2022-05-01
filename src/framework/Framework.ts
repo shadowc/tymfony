@@ -1,6 +1,5 @@
 import path from 'path';
-import { readFileSync, readdirSync, lstatSync } from 'fs';
-import { parse } from 'yaml';
+import { readFileSync } from 'fs';
 import  { Express } from 'express';
 import express from 'express';
 import 'dotenv/config';
@@ -8,6 +7,10 @@ import { TwingEnvironment, TwingLoaderFilesystem } from 'twing';
 import { ConfigSchema } from '@Framework/types/config/config';
 import IAbstractController from '@Framework/types/controller';
 import IFramework from '@Framework/types/framework';
+import FileScanner from '@Framework/helpers/FileScanner.js';
+import ConfigLoader from '@Framework/helpers/ConfigLoader.js';
+import {buildSolutionReferences} from "ts-loader/dist/instances";
+import AbstractController from "@Framework/AbstractController";
 
 export default class Framework implements IFramework {
     private expressInstance: Express;
@@ -15,9 +18,12 @@ export default class Framework implements IFramework {
     private readonly sourceRoot: string;
     private readonly appPort: number = 8000;
 
+    private fileScanner: FileScanner;
+    private configLoader: ConfigLoader;
+
     public environment: TwingEnvironment;
     public config: ConfigSchema;
-    public controllers: IAbstractController[] = []  ;
+    public controllers: IAbstractController[] = [];
 
     constructor() {
         if (typeof path.resolve === 'undefined') {
@@ -25,6 +31,8 @@ export default class Framework implements IFramework {
         }
 
         this.expressInstance = express();
+        this.fileScanner = new FileScanner();
+        this.configLoader = new ConfigLoader();
 
         // Assume we're running in ./build/app.js
         this.projectRoot = path.resolve(__dirname, '..');
@@ -49,7 +57,10 @@ export default class Framework implements IFramework {
         // Start the Twig Engine
         const twigBasePath = path.resolve(this.projectRoot, this.config.twig.template_path);
         const TwigLoader = new TwingLoaderFilesystem(path.resolve(this.projectRoot, twigBasePath));
-        this.environment = new TwingEnvironment(TwigLoader);
+        this.environment = new TwingEnvironment(TwigLoader)
+
+        // start server listen
+        this.expressInstance.listen(this.appPort);
     }
 
     private getDefaultFrameworkConfig(): ConfigSchema {
@@ -68,30 +79,26 @@ export default class Framework implements IFramework {
     }
 
     private loadConfigFile(absolutePath: string) {
-        let contents = readFileSync(absolutePath).toString();
-        this.config = Object.assign(this.config, parse(contents));
+        const configObject = this.configLoader.loadConfigFile(absolutePath);
+
+        if (configObject !== null) {
+            this.config = Object.assign(this.config, configObject);
+        }
     }
 
     private loadController(absolutePath: string) {
-        this.controllers.push(require(absolutePath).default);
+        if (absolutePath.substring(absolutePath.length - 3) === '.ts') {
+            const builtFilePath = `./${absolutePath.substring(absolutePath.indexOf(this.config.framework.controller_path))}`;
+
+            console.log('requiring file: ' + builtFilePath);
+            const module = require('./build/' + builtFilePath);
+            console.log(module);
+
+            //this.controllers.push(new module());
+        }
     }
 
-    private scanFiles(filesPath: string, callback: (filePath: string) => void) {
-        const files = readdirSync(filesPath);
-
-        files.forEach((file) => {
-            const absolutePath = path.resolve(filesPath, file);
-
-            if (
-                file.substring(file.length - 5) === '.yaml'
-                || file.substring(file.length - 4) === '.yml'
-            ) {
-                callback(absolutePath);
-            } else {
-                if (lstatSync(absolutePath).isDirectory()) {
-                    this.scanFiles(absolutePath, callback);
-                }
-            }
-        });
+    private scanFiles(absolutePath: string, callback: (filePath: string) => void) {
+        this.fileScanner.scanFiles(absolutePath, callback);
     }
 }

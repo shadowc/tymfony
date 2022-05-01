@@ -2,6 +2,7 @@ import Framework from '@Framework/Framework';
 
 const framework = new Framework();
 
+/*
 const start = async () => {
     console.log(await framework.environment.render('Pages/index.html.twig', {
         app: {
@@ -11,3 +12,4 @@ const start = async () => {
 }
 
 start();
+*/

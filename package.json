@@ -4,6 +4,7 @@
     "description": "A wrapper framework on top of express",
     "main": "build/app.js",
     "scripts": {
+        "prebuild": "rm -rf ./build",
         "build": "APP_ENV=development ./node_modules/.bin/webpack",
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node build/app.js"

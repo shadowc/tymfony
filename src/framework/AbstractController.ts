@@ -3,14 +3,9 @@ import IFramework from '@Framework/types/framework';
 
 export default class AbstractController implements IAbstractController {
     protected framework: IFramework
-    protected route: string = '';
 
     constructor(framework: IFramework) {
         this.framework = framework;
-    }
-
-    protected action() {
-        // Override
     }
 
     protected async renderView(templateFile: string, context: any): Promise<string> {
