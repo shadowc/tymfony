@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "outDir": "./build/",
+        "rootDir": "src",
+        "strict": true,
+        "noImplicitAny": true,
+        "module": "es2015",
+        "target": "es2020",
+        "allowJs": false,
+        "sourceMap": true,
+        "allowSyntheticDefaultImports": true,
+        "moduleResolution": "node",
+        "baseUrl": "./src",
+        "paths": {
+            "@Framework/*": ["framework/*"]
+        }
+    },
+    "include": [
+        "src/framework/**/*"
+    ],
+    "exclude": [
+        "dist",
+        "__tests__",
+        "samples"
+    ],
+}

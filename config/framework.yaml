@@ -1,0 +1,4 @@
+framework:
+    default_lang: 'en'
+    controller_path: 'controllers'
+    services_path: 'services'
