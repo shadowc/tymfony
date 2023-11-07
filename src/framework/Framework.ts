@@ -2,7 +2,7 @@ import 'dotenv/config';
 import path from 'path';
 import  { Express } from 'express';
 import express from 'express';
-import { TwingEnvironment, TwingLoaderFilesystem } from 'twing';
+import Twig from 'twig';
 import { ConfigSchema } from '@Framework/types/config/config';
 import IAbstractController from '@Framework/types/controller';
 import IFramework from '@Framework/types/framework';
@@ -20,8 +20,8 @@ export default class Framework implements IFramework {
     private fileScanner: FileScanner;
     private configLoader: ConfigLoader;
 
-    public environment: TwingEnvironment;
     public config: ConfigSchema;
+    public environment: { basePath: string; twig: typeof Twig; };
     public controllers: IAbstractController[] = [];
     public routes: RoutingData;
 
@@ -43,7 +43,6 @@ export default class Framework implements IFramework {
         }
 
         this.config = this.getDefaultFrameworkConfig();
-
         console.log(`Starting server at "${this.projectRoot}".`);
 
         // Read config files
@@ -58,8 +57,10 @@ export default class Framework implements IFramework {
 
         // Start the Twig Engine
         const twigBasePath = path.resolve(this.projectRoot, this.config.twig.template_path);
-        const TwigLoader = new TwingLoaderFilesystem(path.resolve(this.projectRoot, twigBasePath));
-        this.environment = new TwingEnvironment(TwigLoader);
+        this.environment = {
+            basePath: twigBasePath,
+            twig: Twig,
+        };
     }
 
     public start() {
