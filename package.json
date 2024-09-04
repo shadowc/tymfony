@@ -18,7 +18,7 @@
         "ts-loader": "^9.2.9",
         "twig": "^1.16.0",
         "typescript": "^4.6.4",
-        "webpack": "^5.76.0",
+        "webpack": "^5.94.0",
         "yaml": "^2.2.2"
     },
     "devDependencies": {
